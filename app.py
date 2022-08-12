@@ -44,6 +44,7 @@ class Venue(db.Model):
     website_link = db.Column(db.String(120))
     talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(150))
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     shows = db.relationship("Show", backref="venue", lazy=True)
 
     def __repr__(self):
@@ -63,6 +64,7 @@ class Artist(db.Model):
     website_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(150))
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     shows = db.relationship("Show", backref="artist", lazy=True)
 
     def __repr__(self):
@@ -99,7 +101,18 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
-  return render_template('pages/home.html')
+  venues = []
+  artists = []
+  venues = (
+      Venue.query.with_entities(Venue.id, Venue.name, Venue.genres, Venue.image_link).order_by(Venue.date_created.desc()).limit(10).all()
+  )
+  artists = (
+      Artist.query.with_entities(Artist.id, Artist.name, Artist.genres).order_by(Artist.date_created.desc()).limit(10).all()
+  )
+  # empty_venue_imgs = Venue.query.filter_by(image_link='').all()
+  # for empty_venue_img in empty_venue_imgs:
+  #   empty_venue_img.image_link="https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+  return render_template("pages/home.html", venues=venues, artists=artists )
 
 
 #  Venues
@@ -142,18 +155,24 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+  search_term = request.form.get("search_term", "").strip()
+  search_term=request.form.get('search_term')
+  venues = Venue.query.filter_by(Venue.name.ilike('% + search_term + %')).all()
+  response = {}
+  response.count = len(venues)
+  response.data = venues
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }
-  return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+  # response={
+  #   "count": 1,
+  #   "data": [{
+  #     "id": 2,
+  #     "name": "The Dueling Pianos Bar",
+  #     "num_upcoming_shows": 0,
+  #   }]
+  # }
+  return render_template('pages/search_venues.html', results=response, search_term=search_term)
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -256,17 +275,23 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
+  search_term = request.form.get("search_term", "").strip()
+  search_term=request.form.get('search_term')
+  artists = Artist.query.filter_by(Artist.name.ilike('% + search_term + %')).all()
+  response = {}
+  response.count = len(artists)
+  response.data = artists
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band".
-  response={
-    "count": 1,
-    "data": [{
-      "id": 4,
-      "name": "Guns N Petals",
-      "num_upcoming_shows": 0,
-    }]
-  }
+  # response={
+  #   "count": 1,
+  #   "data": [{
+  #     "id": 4,
+  #     "name": "Guns N Petals",
+  #     "num_upcoming_shows": 0,
+  #   }]
+  # }
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
@@ -319,7 +344,7 @@ def edit_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
   try:
-    artist = Artist.query.get(artist_id)
+   
     name = request.form.get('name')
     city = request.form.get('city')
     state = request.form.get('state')
@@ -331,16 +356,18 @@ def edit_artist_submission(artist_id):
     seeking_venue = request.form.get('seeking_venue')
     seeking_description = request.form.get('seeking_description', '')
 
-    name=name,
-    city=city,
-    state=state,
-    phone=phone,
-    genres=genres,
-    image_link=image_link,
-    facebook_link=facebook_link,
-    website_link=website_link,
-    seeking_venue=seeking_venue,
-    seeking_description=seeking_description
+    artist = Artist.query.get(artist_id)
+
+    artist.name = name,
+    artist.city = city,
+    artist.state = state,
+    artist.phone = phone,
+    artist.genres = genres,
+    artist.image_link = image_link,
+    artist.facebook_link = facebook_link,
+    artist.website_link = website_link,
+    seeking_venue = seeking_venue,
+    artist.seeking_description = seeking_description
 
     db.session.commit()
     flash('Artist ' + request.form['name'] + ' was successfully updated!')
@@ -372,7 +399,6 @@ def edit_venue(venue_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
   try:
-    venue = Venue.query.get(venue_id)
     name = request.form.get('name')
     city = request.form.get('city')
     state = request.form.get('state')
@@ -385,17 +411,19 @@ def edit_venue_submission(venue_id):
     talent = request.form.get('seeking_talent')
     seeking_description = request.form.get('seeking_description', '')
 
-    name=name,
-    city=city,
-    state=state,
-    phone=phone,
-    address=address 
-    genres=genres,
-    image_link=image_link,
-    facebook_link=facebook_link,
-    website_link=website_link,
-    talent=talent,
-    seeking_description=seeking_description
+    venue = Venue.query.get(venue_id)
+
+    venue.name = name,
+    venue.city = city,
+    venue.state = state,
+    venue.phone = phone,
+    venue.address = address 
+    venue.genres = genres,
+    venue.image_link = image_link,
+    venue.facebook_link = facebook_link,
+    venue.website_link = website_link,
+    talent = talent,
+    venue.seeking_description = seeking_description
 
     db.session.commit()
     flash('Venue ' + request.form['name'] + ' was successfully updated!')
