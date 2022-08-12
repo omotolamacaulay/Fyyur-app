@@ -44,12 +44,10 @@ class Venue(db.Model):
     website_link = db.Column(db.String(120))
     talent = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(150))
+    shows = db.relationship("Show", backref="venue", lazy=True)
 
     def __repr__(self):
       return f'<Venue {self.id} {self.name} {self.city} {self.state} {self.address} {self.phone} {self.genres} {self.image_link} {self.facebook_link} {self.website_link} {self.talent} {self.seeking_description}>'
-
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
     __tablename__ = 'artists'
@@ -65,12 +63,22 @@ class Artist(db.Model):
     website_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
     seeking_description = db.Column(db.String(150))
+    shows = db.relationship("Show", backref="artist", lazy=True)
 
     def __repr__(self):
       return f'<Artist {self.id} {self.name} {self.city} {self.state} {self.phone} {self.genres} {self.image_link} {self.facebook_link} {self.website_link} {self.seeking_venue} {self.seeking_description}>'
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+class Show(db.Model):
+  __tablename__ = 'shows'
+
+  id = db.Column(db.Integer, primary_key=True)
+  venue_id= db.Column(db.Integer, db.ForeignKey("venues.id"), nullable=False)
+  artist_id= db.Column(db.Integer, db.ForeignKey("artists.id"), nullable=False)
+  start_time= db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+  def __repr__(self):
+    return f'<Artist {self.id} {self.venue_id} {self.artist_id} {self.start_time}>'
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -282,8 +290,7 @@ def delete_venue(venue_id):
     flash('An error occurred. Venue could not be deleted.')
    finally:
     db.session.close()
-  # TODO: Complete this endpoint for taking a venue_id, and using
-  # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
+ 
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
