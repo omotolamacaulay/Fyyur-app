@@ -22,4 +22,58 @@
 		<img id="front-splash" src="{{ url_for('static',filename='img/front-splash.jpg') }}" alt="Front Photo of Musical Band" />
 	</div>
 </div>
+<div class="row">
+	<div class="col-sm-6">
+		{% if venues %}
+		<p class="lead">Recently Posted Venues</p>
+
+		<ul class="items">
+			{% for venue in venues %}
+			<li>
+				<a href="/venues/{{ venue.id }}">
+					<i class="fas fa-music"></i>
+					<div class="item">
+						<h4 style="margin-top: 0px;">{{ venue.name }}</h4>
+						{% for genre in venue.genres %}
+						<h6>{{ genre }}</h6>
+						{% endfor %}
+						{% if venue.image_link %}
+						<h3>{{venue.image_link}}</h3>
+						{% else %}
+						<img src="https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80" alt="" style="width: 300px; height: 300px;">
+						{% endif %}
+					</div>
+				</a>
+			</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+	</div>
+	<div class="col-sm-6">
+		{% if artists %}
+		<p class="lead">Recently Posted Artists</p>
+
+		<ul class="items">
+			{% for artist in artists %}
+			<li>
+				<a href="/artists/{{ artist.id }}">
+					<i class="fas fa-users"></i>
+					<div class="item">
+						<h4 style="margin-top: 0px;">{{ artist.name }}</h4>
+						{% for genre in artist.genres %}
+						<h6>{{ genre }}</h6>
+						{% endfor %}
+						{% if artist.image_link %}
+						<h3>{{artist.image_link}}</h3>
+						{% else %}
+						<img src="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80" alt="" style="width: 300px; height: 300px;">
+						{% endif %}
+					</div>
+				</a>
+			</li>
+			{% endfor %}
+		</ul>
+		{% endif %}
+	</div>
+</div>
 {% endblock %}

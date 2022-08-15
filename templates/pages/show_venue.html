@@ -43,7 +43,11 @@
 		{% endif %}
 	</div>
 	<div class="col-sm-6">
+		{% if venue.image_link %}
 		<img src="{{ venue.image_link }}" alt="Venue Image" />
+		{% else %}
+		<img src="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80" alt="">
+		{% endif %}
 	</div>
 </div>
 <section>
@@ -52,7 +56,11 @@
 		{%for show in venue.upcoming_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
+				{% if show.artist_image_link %}
 				<img src="{{ show.artist_image_link }}" alt="Show Artist Image" />
+				{% else %}
+				<img src="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80" alt="">
+				{% endif %}
 				<h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
 				<h6>{{ show.start_time|datetime('full') }}</h6>
 			</div>
@@ -66,7 +74,11 @@
 		{%for show in venue.past_shows %}
 		<div class="col-sm-4">
 			<div class="tile tile-show">
+				{% if show.artist_image_link %}
 				<img src="{{ show.artist_image_link }}" alt="Show Artist Image" />
+				{% else %}
+				<img src="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80" alt="">
+				{% endif %}
 				<h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
 				<h6>{{ show.start_time|datetime('full') }}</h6>
 			</div>
@@ -76,6 +88,8 @@
 </section>
 
 <a href="/venues/{{ venue.id }}/edit"><button class="btn btn-primary btn-lg">Edit</button></a>
+<!-- <button class="btn btn-primary btn-lg delete" data-id="{{venue.id}}">Delete</button> -->
 
 {% endblock %}
+
 
