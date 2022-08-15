@@ -111,7 +111,6 @@ def index():
   )
   # empty_venue_imgs = Venue.query.filter_by(image_link='').all()
   # for empty_venue_img in empty_venue_imgs:
-  #   empty_venue_img.image_link="https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
   return render_template("pages/home.html", venues=venues, artists=artists )
 
 
